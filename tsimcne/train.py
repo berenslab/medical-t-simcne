@@ -326,7 +326,6 @@ def train_one_epoch(
 
         td["t_batch"][i] = t_batch()
 
-
     return dict(batch_losses=losses, **td)
 
 

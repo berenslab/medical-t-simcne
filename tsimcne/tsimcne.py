@@ -23,7 +23,7 @@ class TSimCNE:
         backbone="resnet18",
         projection_head="mlp",
         mutate_model_inplace=True,
-        data_transform_train=None,
+        data_transform=None,
         total_epochs=[1000, 50, 450],
         batch_size=512,
         out_dim=2,
@@ -34,7 +34,6 @@ class TSimCNE:
         freeze_schedule="only_linear",
         device="cuda:0",
         num_workers=8,
-        seed=None 
     ):
         self.model = model
         self.loss = loss
@@ -42,7 +41,7 @@ class TSimCNE:
         self.backbone = backbone
         self.projection_head = projection_head
         self.mutate_model_inplace = mutate_model_inplace
-        self.data_transform_train = data_transform_train
+        self.data_transform = data_transform
         self.out_dim = out_dim
         self.batch_size = batch_size
         self.optimizer = optimizer
@@ -53,19 +52,19 @@ class TSimCNE:
         self.freeze_schedule = freeze_schedule
         self.device = device
         self.num_workers = num_workers
-        self.seed=seed 
+
         self._handle_parameters()
 
     def _handle_parameters(self):
         if self.model is None:
             self.model = make_model(
-                seed=self.seed,
                 backbone=self.backbone, proj_head=self.projection_head
             )
 
         if self.loss == "infonce":
             if self.metric is None:
-                self.metric = "euclidean" 
+                self.metric = "euclidean"
+
             if self.metric == "euclidean":
                 self.loss = InfoNCECauchy()
             elif self.metric == "cosine":
@@ -74,7 +73,7 @@ class TSimCNE:
                 self.loss = InfoNCEGaussian()
             else:
                 raise ValueError(
-                    f"Unknown {self.metric!r} for InfoNCE loss"
+                    f"Unknown {self.metric = !r} for InfoNCE loss"
                 )
         # else: assume that the loss is a proper pytorch loss function
 
@@ -96,14 +95,14 @@ class TSimCNE:
         else:
             raise ValueError(
                 'Expected "auto_batch" or a list of learning rates '
-                f" but got {self.lr!r}."
+                f" but got {self.lr = !r}."
             )
 
         if self.n_stages != len(self.learning_rates):
             raise ValueError(
                 f"Got {self.total_epochs} for total epochs, but "
                 f"{self.learning_rates} for learning rates "
-                f"(due to {self.lr!r})."
+                f"(due to {self.lr = !r})."
             )
 
         if self.warmup == "auto":
@@ -113,7 +112,7 @@ class TSimCNE:
         else:
             raise ValueError(
                 'Expected "auto" or a list of warmup epochs '
-                f"but got {self.warmup!r}."
+                f"but got {self.warmup = !r}."
             )
 
         if len(self.warmup_schedules) != self.n_stages:
@@ -142,19 +141,17 @@ class TSimCNE:
     def fit_transform(
         self,
         X: torch.utils.data.Dataset,
-        data_transform_eval=None,
+        data_transform=None,
         return_labels: bool = False,
         return_backbone_feat: bool = False,
     ):
-        train_output=self.fit(X)
-
-        transform_output= self.transform( 
+        self.fit(X)
+        return self.transform(
             X,
-            data_transform=data_transform_eval,
+            data_transform=data_transform,
             return_labels=return_labels,
             return_backbone_feat=return_backbone_feat,
         )
-        return train_output,transform_output
 
     def fit(self, X: torch.utils.data.Dataset):
         if not self.mutate_model_inplace:
@@ -162,7 +159,7 @@ class TSimCNE:
 
             self.model = copy(self.model)
 
-        if self.data_transform_train is None:
+        if self.data_transform is None:
             sample_img, _lbl = X[0]
             if isinstance(sample_img, PIL.Image.Image):
                 size = sample_img.size
@@ -173,7 +170,7 @@ class TSimCNE:
                 )
 
             # data augmentations for contrastive training
-            self.data_transform_train = get_transforms_unnormalized(
+            self.data_transform = get_transforms_unnormalized(
                 size=size,
                 setting="contrastive",
             )
@@ -184,7 +181,7 @@ class TSimCNE:
 
         # dataset that returns two augmented views of a given
         # datapoint (and label)
-        dataset_contrastive = TransformedPairDataset(X, self.data_transform_train)
+        dataset_contrastive = TransformedPairDataset(X, self.data_transform)
         # wrap dataset into dataloader
         train_dl = torch.utils.data.DataLoader(
             dataset_contrastive,
@@ -196,30 +193,25 @@ class TSimCNE:
         it = zip(
             self.epoch_schedule, self.learning_rates, self.warmup_schedules
         )
-        train_out=[]
         for n_stage, (n_epochs, lr, warmup_epochs) in enumerate(it):
+            self._fit_stage(train_dl, n_epochs, lr, warmup_epochs)
 
-            losses_dict=self._fit_stage(train_dl, n_epochs, lr, warmup_epochs)
-            train_out.append(losses_dict)
-
-            if n_stage == 0: 
+            if n_stage == 0:
                 mutate_model(
                     self.model,
                     change="lastlin",
-                    freeze=True,    
+                    freeze=True,
                     out_dim=self.out_dim,
                 )
             elif n_stage == 1:
                 mutate_model(self.model, freeze=False)
-        return train_out
 
-    
     def _fit_stage(
         self,
         X: torch.utils.data.DataLoader,
         n_epochs: int,
-        lr: float, 
-        warmup_epochs: int, 
+        lr: float,
+        warmup_epochs: int,
     ):
         if self.optimizer == "sgd":
             self.opt = make_sgd(self.model, lr=lr)
@@ -229,7 +221,7 @@ class TSimCNE:
                 self.opt, n_epochs=n_epochs, warmup_epochs=warmup_epochs
             )
 
-        return train(
+        train(
             X,
             self.model,
             self.loss,
@@ -263,7 +255,7 @@ class TSimCNE:
         )
 
         Y, backbone_features, labels = to_features(
-            self.model, loader, device=self.device,
+            self.model, loader, device=self.device
         )
 
         if return_labels and return_backbone_feat:
@@ -276,4 +268,60 @@ class TSimCNE:
             return Y
 
 
+# def example_test_cifar10():
 
+#     # get the cifar dataset
+#     dataset_train = torchvision.datasets.CIFAR10(
+#         root="experiments/cifar/out/cifar10",
+#         download=True,
+#         train=True,
+#     )
+#     dataset_test = torchvision.datasets.CIFAR10(
+#         root="experiments/cifar/out/cifar10",
+#         download=True,
+#         train=False,
+#     )
+#     dataset_full = torch.utils.data.ConcatDataset(
+#         [dataset_train, dataset_test]
+#     )
+
+#     # mean, std, size correspond to dataset
+#     mean = (0.4914, 0.4822, 0.4465)
+#     std = (0.2023, 0.1994, 0.2010)
+#     size = (32, 32)
+
+#     # data augmentations for contrastive training
+#     transform = get_transforms(
+#         mean,
+#         std,
+#         size=size,
+#         setting="contrastive",
+#     )
+#     # transform_none just normalizes the sample
+#     transform_none = get_transforms(
+#         mean,
+#         std,
+#         size=size,
+#         setting="test_linear_classifier",
+#     )
+
+#     # datasets that return two augmented views of a given datapoint (and label)
+#     dataset_contrastive = TransformedPairDataset(dataset_train, transform)
+#     dataset_visualize = TransformedPairDataset(dataset_full, transform_none)
+
+#     # wrap dataset into dataloader
+#     train_dl = torch.utils.data.DataLoader(
+#         dataset_contrastive, batch_size=1024, shuffle=True
+#     )
+#     orig_dl = torch.utils.data.DataLoader(
+#         dataset_visualize, batch_size=1024, shuffle=False
+#     )
+
+#     # create the object
+#     tsimcne = TSimCNE(total_epochs=[3, 2, 2])
+#     # train on the augmented/contrastive dataloader (this takes the most time)
+#     tsimcne.fit(train_dl)
+#     # fit the original images
+#     Y, labels = tsimcne.transform(orig_dl, return_labels=True)
+
+#     return Y, labels

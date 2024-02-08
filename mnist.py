@@ -3,53 +3,40 @@ import medmnist.dataset
 import torch
 from tsimcne.imagedistortions import *
 from tsimcne.tsimcne import TSimCNE
+from sklearn import neighbors, model_selection
 
 
 root='datasets'
 dataset_train = medmnist.dataset.DermaMNIST(root=root, split='train', transform=None, target_transform=None, download=True)
 dataset_test = medmnist.dataset.DermaMNIST(root=root, split='test', transform=None, target_transform=None, download=True)
 dataset_val = medmnist.dataset.DermaMNIST(root=root, split='val', transform=None, target_transform=None, download=True)
-dataset_full = torch.utils.data.ConcatDataset([dataset_train, dataset_test,dataset_val])
+dataset_full = [dataset_train, dataset_test,dataset_val]
+for dataset in dataset_full:
+        dataset.labels = dataset.labels.squeeze()
+dataset_full = ConcatDataset(dataset_full)
+
 labels = np.array([lbl for img, lbl in dataset_full])
 
 
-dataset_name = dataset_train.info['python_class']
-
-
-size=28
-crop_scale = 0.2, 1
 batch_size=1024
-
-
-augmentations=transforms.Compose(
-            [
-                transforms.RandomApply([
-                    lambda img: transforms.functional.rotate(img,90)
-               ]),
-                transforms.RandomResizedCrop(size=size, scale=crop_scale),
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomVerticalFlip(),
-                transforms.RandomApply(
-                    [transforms.ColorJitter(brightness=0.4,contrast=0.4, 
-                        saturation=0.4,hue=0.1 )
-                    ], p=0.8
-                ),
-                transforms.RandomGrayscale(p=0.2),
-                transforms.ToTensor(),
-            ])
-
-
-epoch_total=[450,50,200]
+total_epochs=[1000,50,450]
 
 tsimcne_ = TSimCNE(batch_size=batch_size,
-                   total_epochs=epoch_total,
-                   data_transform_train=augmentations)
+                   total_epochs=total_epochs)
 
 
 Y = tsimcne_.fit_transform(dataset_full)
 
 
+X_train, X_test, y_train, y_test = model_selection.train_test_split(Y,labels, 
+                                                                    test_size=0.1, 
+                                                                    random_state=4444,
+                                                                    stratify=labels)
 
+knn = neighbors.KNeighborsClassifier(15)
+knn.fit(X_train, y_train)
+kNN_score=knn.score(X_test, y_test).round(3)
+print(f"kNN_score: {kNN_score}")
 
 
 

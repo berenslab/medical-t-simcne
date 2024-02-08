@@ -5,7 +5,6 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from torch import nn
 from sklearn.model_selection import train_test_split
 
 from .eval.ann import ann_acc
@@ -19,7 +18,7 @@ def make_callbacks(
     model_save_freq=None,
     embedding_save_freq=None,
     ann_evaluate=True,
-    seed=None, 
+    seed=None,  # for ann evaluation
 ) -> tuple:
     """Set up callbacks, suitable for use in `train` (train.py).
 
@@ -127,7 +126,7 @@ def make_callbacks(
             # no checkpoint necessary
             pass
         else:
-            raise ValueError(f"Unknown callback {mode!r}")
+            raise ValueError(f"Unknown callback {mode = !r}")
 
     model_save_freq = freq if model_save_freq is None else model_save_freq
 
@@ -163,7 +162,7 @@ def make_callbacks(
             # the final model.pt.
             pass
         else:
-            raise ValueError(f"Unknown callback {mode!r}")
+            raise ValueError(f"Unknown callback {mode = !r}")
 
     embedding_save_freq = (
         freq if embedding_save_freq is None else embedding_save_freq
@@ -221,7 +220,7 @@ def make_callbacks(
             # not saving embeddings this time
             pass
         else:
-            raise ValueError(f"Unknown callback {mode!r}")
+            raise ValueError(f"Unknown callback {mode = !r}")
 
     callbacks = []
     if isinstance(checkpoint_save_freq, int) and checkpoint_save_freq > 0:
@@ -234,7 +233,7 @@ def make_callbacks(
     return callbacks
 
 
-def to_features(model, dataloader, device, eval_mode=True):
+def to_features(model, dataloader, device):
     """Iterate over a whole dataset/loader and return the results.
 
     This will transform all of the input in `dataloader` by passing it
@@ -248,9 +247,7 @@ def to_features(model, dataloader, device, eval_mode=True):
     bb_feats = []
     labels = []
 
-    if eval_mode:
-        model.eval()
- 
+    model.eval()
     with torch.no_grad():
         for (im1, _im2), lbls in dataloader:
             features, backbone_features = model(im1.to(device))
@@ -261,9 +258,9 @@ def to_features(model, dataloader, device, eval_mode=True):
 
     Z = np.vstack(feats).astype(np.float16)
     H = np.vstack(bb_feats).astype(np.float16)
-    labels_ = np.hstack(labels).astype(np.uint8)
+    labels = np.hstack(labels).astype(np.uint8)
 
-    return Z, H, labels_
+    return Z, H, labels
 
 
 def ann_evaluation(

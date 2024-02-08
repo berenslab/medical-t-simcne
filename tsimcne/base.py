@@ -27,7 +27,7 @@ class ProjectBase(abc.ABC):
             self.random_state = np.random.default_rng(random_state)
         else:
             raise ValueError(
-                f"Expected random_state or seed, but got {random_state!r}"
+                f"Expected random_state or seed, but got {random_state = }"
             )
 
         # will also create self.path

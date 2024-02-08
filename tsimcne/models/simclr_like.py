@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchvision import models
-import torchvision.models as models
 
 from ..base import ProjectBase
 
@@ -244,19 +242,7 @@ class ResNet(nn.Module):
         out = self.avgpool(out)
         out = torch.flatten(out, 1)
         return out
-    
 
-
-def pytorch_resnet(in_channel=3):
-    model = models.resnet18(pretrained=False)
-    model.fc=torch.nn.Identity()
-    return model 
-    
-
-
-class Flatten(nn.Module):
-    def forward(self, input):
-        return input.view(input.size(0), -1)
 
 def resnet18(**kwargs):
     return ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
@@ -273,17 +259,10 @@ def resnet50(**kwargs):
 def resnet101(**kwargs):
     return ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
 
-def resnet152(**kwargs):
-    return ResNet(Bottleneck, [3, 8, 8, 8], **kwargs)
-
-
 
 model_dict = {
     "resnet18": [resnet18, 512],
     "resnet34": [resnet34, 512],
     "resnet50": [resnet50, 2048],
     "resnet101": [resnet101, 2048],
-    "resnet152": [resnet152, 2048],
-    "pytorch_resnet18":[pytorch_resnet,512],
-
 }
