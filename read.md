@@ -24,7 +24,7 @@ labels = np.array([lbl for img, lbl in dataset_full])
 
 
 batch_size=1024
-total_epochs=[1,1,1]
+total_epochs=[1000,50,450]
 
 tsimcne = TSimCNE(batch_size=batch_size,
                    total_epochs=total_epochs)
