@@ -5,9 +5,9 @@ from tsimcne.tsimcne import TSimCNE
 from evaluation.eval import knn_acc,silhouette_score_
 
 root='datasets'
-dataset_train = medmnist.dataset.DermaMNIST(root=root, split='train', transform=None, target_transform=None, download=True)
-dataset_test = medmnist.dataset.DermaMNIST(root=root, split='test', transform=None, target_transform=None, download=True)
-dataset_val = medmnist.dataset.DermaMNIST(root=root, split='val', transform=None, target_transform=None, download=True)
+dataset_train = medmnist.dataset.BloodMNIST(root=root, split='train', transform=None, target_transform=None, download=True)
+dataset_test = medmnist.dataset.BloodMNIST(root=root, split='test', transform=None, target_transform=None, download=True)
+dataset_val = medmnist.dataset.BloodMNIST(root=root, split='val', transform=None, target_transform=None, download=True)
 dataset_full = [dataset_train, dataset_test,dataset_val]
 
 for dataset in dataset_full:
