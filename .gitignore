@@ -1,2 +1,7 @@
 datasets/
 mnist_v2.py
+mnist_v3.py
+log_files/
+numpy_files/
+notebooks/BloodMNIST.ipynb
+notebooks/architecture.ipynb

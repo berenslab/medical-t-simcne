@@ -34,6 +34,9 @@ class TSimCNE:
         freeze_schedule="only_linear",
         device="cuda:0",
         num_workers=8,
+        seed=None
+
+
     ):
         self.model = model
         self.loss = loss
@@ -52,13 +55,17 @@ class TSimCNE:
         self.freeze_schedule = freeze_schedule
         self.device = device
         self.num_workers = num_workers
+        self.seed=seed 
 
         self._handle_parameters()
 
     def _handle_parameters(self):
         if self.model is None:
             self.model = make_model(
-                backbone=self.backbone, proj_head=self.projection_head
+                backbone=self.backbone, 
+                proj_head=self.projection_head,
+                seed=self.seed,
+
             )
 
         if self.loss == "infonce":
