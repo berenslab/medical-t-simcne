@@ -65,19 +65,19 @@ with plt.style.context(stylef):
     draw_arch(ax_a, original_image2)
 all_axes.append(ax_a)
 
-
+img_dict = dict(ha='center', va='top', fontsize=7)
 for i, (title, tr) in enumerate(img_augmentations.items()):
     ax = plt.subplot2grid((grid_rows, grid_cols), (0, 3 + i)) 
     ax.set_axis_off()
     ax.imshow(tr(original_image), cmap="gray")
-    ax.text(0.5, -0.15, title, ha='center', va='top', transform=ax.transAxes, fontsize=7)
+    ax.text(0.5, -0.15, title, transform=ax.transAxes,fontdict=img_dict )
     all_axes.append(ax)
 
 for i, (title, tr) in enumerate(our_augmentations.items()):
     ax = plt.subplot2grid((grid_rows, grid_cols), (1, 3 + i))  
     ax.set_axis_off()
     ax.imshow(tr(original_image), cmap="gray")
-    ax.text(0.5, -0.15, title, ha='center', va='top', transform=ax.transAxes, fontsize=7)
+    ax.text(0.5, -0.15, title, transform=ax.transAxes,fontdict=img_dict)
     all_axes.append(ax)
 
 axes.set_axis_off()
@@ -86,4 +86,5 @@ fig.text(0.005, 1., 'a',fontdict=text_dict)
 fig.text(0.47, 1., 'b',fontdict=text_dict)  
 fig.text(0.47, 0.5, 'c',fontdict=text_dict)  
 
-plt.savefig('../../figures/arch-augmentation.pdf',dpi=1000)
+plt.savefig('../../figures/arch-augmentation.pdf',dpi=300)
+plt.savefig('../../figures/arch-augmentation.png',dpi=100)

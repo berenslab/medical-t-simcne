@@ -50,6 +50,7 @@ def draw_arch(ax, orig_im):
         linewidth=plt.rcParams["axes.linewidth"],
         relpos=(1, 0.5),
         shrinkB=7,
+        
     )
     txtkwargs = dict(
         usetex=True,
@@ -63,7 +64,7 @@ def draw_arch(ax, orig_im):
     t_im1 = cropfun(orig_im)
     t_im2 = F.vflip(orig_im)
     new_props = aprops.copy()
-
+   
     xybox_cord=(-0.3, 0.5)
     im0 = OffsetImage(to_pil_image(orig_im), zoom=zoom)
     y_mid=get_image_midpoint(t_im1,xybox_cord,zoom)
@@ -78,8 +79,11 @@ def draw_arch(ax, orig_im):
         
     )
     ax.add_artist(abox0)
+    
 
     se_props=aprops.copy()
+    # se_props["mutation_scale"] = 1
+    # se_props["shrinkB"] = 1
     abox1_xybox=(0.25, 0.85)
 
     im1 = OffsetImage(to_pil_image(t_im1), zoom=zoom)
@@ -170,7 +174,7 @@ def draw_arch(ax, orig_im):
 
     ph_props = aprops.copy()
     ph_props["shrinkB"] = 1
-    ph_props["shrinkA"] = 5
+    ph_props["shrinkA"] = 5#how much the arrow start point should move from the specified start position specified
 
 
     t = txtkwargs.copy()
