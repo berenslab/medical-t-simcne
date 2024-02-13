@@ -11,7 +11,7 @@ labelcolors = np.array(
 )
 labelnames = ["no metastasis", "metastasis"]
 
-npz = np.load("npz_files/camelyon.npz")
+npz = np.load("camelyon.npz")
 labels = npz["lbls"]
 n_labels = len(labelnames)
 Y = npz["embeddings"]
