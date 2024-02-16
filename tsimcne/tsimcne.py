@@ -35,8 +35,6 @@ class TSimCNE:
         device="cuda:0",
         num_workers=8,
         seed=None
-
-
     ):
         self.model = model
         self.loss = loss
@@ -55,17 +53,14 @@ class TSimCNE:
         self.freeze_schedule = freeze_schedule
         self.device = device
         self.num_workers = num_workers
-        self.seed=seed 
-
+        self.seed=seed
         self._handle_parameters()
 
     def _handle_parameters(self):
         if self.model is None:
             self.model = make_model(
-                backbone=self.backbone, 
-                proj_head=self.projection_head,
                 seed=self.seed,
-
+                backbone=self.backbone, proj_head=self.projection_head
             )
 
         if self.loss == "infonce":
@@ -250,6 +245,14 @@ class TSimCNE:
 
         # dataset that returns two augmented views of a given
         # datapoint (and label)
+        if data_transform is None:
+            sample_img, _lbl = X[0]
+            if isinstance(sample_img, PIL.Image.Image):
+                size = sample_img.size
+            self.data_transform_none = get_transforms_unnormalized(
+            size=size, setting="none"
+        )
+            
         dataset_contrastive = TransformedPairDataset(
             X, self.data_transform_none
         )
@@ -273,62 +276,3 @@ class TSimCNE:
             return Y, labels
         else:
             return Y
-
-
-# def example_test_cifar10():
-
-#     # get the cifar dataset
-#     dataset_train = torchvision.datasets.CIFAR10(
-#         root="experiments/cifar/out/cifar10",
-#         download=True,
-#         train=True,
-#     )
-#     dataset_test = torchvision.datasets.CIFAR10(
-#         root="experiments/cifar/out/cifar10",
-#         download=True,
-#         train=False,
-#     )
-#     dataset_full = torch.utils.data.ConcatDataset(
-#         [dataset_train, dataset_test]
-#     )
-
-#     # mean, std, size correspond to dataset
-#     mean = (0.4914, 0.4822, 0.4465)
-#     std = (0.2023, 0.1994, 0.2010)
-#     size = (32, 32)
-
-#     # data augmentations for contrastive training
-#     transform = get_transforms(
-#         mean,
-#         std,
-#         size=size,
-#         setting="contrastive",
-#     )
-#     # transform_none just normalizes the sample
-#     transform_none = get_transforms(
-#         mean,
-#         std,
-#         size=size,
-#         setting="test_linear_classifier",
-#     )
-
-#     # datasets that return two augmented views of a given datapoint (and label)
-#     dataset_contrastive = TransformedPairDataset(dataset_train, transform)
-#     dataset_visualize = TransformedPairDataset(dataset_full, transform_none)
-
-#     # wrap dataset into dataloader
-#     train_dl = torch.utils.data.DataLoader(
-#         dataset_contrastive, batch_size=1024, shuffle=True
-#     )
-#     orig_dl = torch.utils.data.DataLoader(
-#         dataset_visualize, batch_size=1024, shuffle=False
-#     )
-
-#     # create the object
-#     tsimcne = TSimCNE(total_epochs=[3, 2, 2])
-#     # train on the augmented/contrastive dataloader (this takes the most time)
-#     tsimcne.fit(train_dl)
-#     # fit the original images
-#     Y, labels = tsimcne.transform(orig_dl, return_labels=True)
-
-#     return Y, labels
