@@ -1,8 +1,36 @@
 # Unsupervised Visualisation of Medical Image Datasets
 
-This repository contains the codes to train a $t$-SimCNE model.
+This repository contains the codes to train a $t$-SimCNE model for medical images. You can find our paper here: [Unsupervised Visualisation of Medical Image Datasets
+](https://openreview.net/pdf?id=HFHRRHsDbT)
 
+#### Citation
+If you use this code, kindly cite our paper:
 
+```
+@inproceedings{
+nwabufo2024selfsupervised,
+title={Self-supervised Visualisation of Medical Image Datasets},
+author={Ifeoma Veronica Nwabufo and Jan Niklas B{\"o}hm and Philipp Berens and Dmitry Kobak},
+booktitle={Submitted to Medical Imaging with Deep Learning},
+year={2024},
+url={https://openreview.net/forum?id=HFHRRHsDbT},
+note={under review}
+}
+```
+
+#### Installation
+```
+git clone https://github.com/berenslab/medical-t-simcne
+cd medical-t-simcne
+pip install .
+```
+![Alt text](figures/arch-augmentation.png "Architecture")
+
+#### PCam16
+$t$-SimCNE reveals interesting aspects of the data. Despite the subtleness in identifying whether an image has metastasis or not, the model is able to yield good class separation and recover meaningful structure.
+![Alt text](figures/camelyon_annotation.png "PCam16")
+
+#### Training a $t$-SimCNE model on MedMNIST dataset
 ```python
 #import libraries
 import numpy as np
@@ -13,9 +41,9 @@ from evaluation.eval import knn_acc,silhouette_score_
 from torch.utils.data import ConcatDataset
 
 root='datasets'
-dataset_train = medmnist.dataset.DermaMNIST(root=root, split='train', transform=None,k target_transform=None, download=True)
-dataset_test = medmnist.dataset.DermaMNIST(root=root, split='test', transform=None, target_transform=None, download=True)
-dataset_val = medmnist.dataset.DermaMNIST(root=root, split='val', transform=None, target_transform=None, download=True)
+dataset_train = medmnist.dataset.BloodMNIST(root=root, split='train', transform=None,target_transform=None, download=True)
+dataset_test = medmnist.dataset.BloodMNIST(root=root, split='test', transform=None, target_transform=None, download=True)
+dataset_val = medmnist.dataset.BloodMNIST(root=root, split='val', transform=None, target_transform=None, download=True)
 dataset_full = [dataset_train, dataset_test,dataset_val]
 
 for dataset in dataset_full:
@@ -28,8 +56,10 @@ labels = np.array([lbl for img, lbl in dataset_full_])
 batch_size=1024
 total_epochs=[1000,50,450]
 
-tsimcne = TSimCNE(batch_size=batch_size,
-                   total_epochs=total_epochs)
+# You can also define your custom augmentations by passing a 'data_transform' parameter.
+# For more details check example.py at the root of this directory or 
+# read the documentation here [https://t-simcne.readthedocs.io/]  
+tsimcne = TSimCNE(batch_size=batch_size, total_epochs=total_epochs) 
 
 
 Y = tsimcne.fit_transform(dataset_full_)
