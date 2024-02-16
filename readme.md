@@ -24,12 +24,9 @@ git clone https://github.com/berenslab/medical-t-simcne
 cd medical-t-simcne
 pip install .
 ```
-\begin{center}
+
 ![Architecture](figures/arch-augmentation.png "Architecture")
-\end{center}
-#### PCam16
-$t$-SimCNE reveals interesting aspects of the data. Despite the subtleness in identifying whether an image has metastasis or not, the model is able to yield good class separation and recover meaningful structure.
-![PCam16](figures/camelyon_annotation.png "PCam16")
+
 
 #### Training a $t$-SimCNE model on MedMNIST dataset
 ```python
