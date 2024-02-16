@@ -24,11 +24,11 @@ git clone https://github.com/berenslab/medical-t-simcne
 cd medical-t-simcne
 pip install .
 ```
-![Alt text](figures/arch-augmentation.png "Architecture")
+![Architecture](figures/arch-augmentation.png "Architecture")
 
 #### PCam16
 $t$-SimCNE reveals interesting aspects of the data. Despite the subtleness in identifying whether an image has metastasis or not, the model is able to yield good class separation and recover meaningful structure.
-![Alt text](figures/camelyon_annotation.png "PCam16")
+![PCam16](figures/camelyon_annotation.png "PCam16")
 
 #### Training a $t$-SimCNE model on MedMNIST dataset
 ```python
@@ -40,6 +40,7 @@ from tsimcne.tsimcne import TSimCNE
 from evaluation.eval import knn_acc,silhouette_score_
 from torch.utils.data import ConcatDataset
 
+#load the data
 root='datasets'
 dataset_train = medmnist.dataset.BloodMNIST(root=root, split='train', transform=None,target_transform=None, download=True)
 dataset_test = medmnist.dataset.BloodMNIST(root=root, split='test', transform=None, target_transform=None, download=True)
@@ -60,13 +61,16 @@ total_epochs=[1000,50,450]
 # For more details check example.py at the root of this directory or 
 # read the documentation here [https://t-simcne.readthedocs.io/]  
 tsimcne = TSimCNE(batch_size=batch_size, total_epochs=total_epochs) 
-
-
 Y = tsimcne.fit_transform(dataset_full_)
 
+#get the metrics
 kNN_score=knn_acc(Y,labels)
 sil_score=silhouette_score_(Y,labels)
-print(f"kNN_score: {kNN_score}")
-print(f"Silhouette score: {sil_score}")
+
+#visualise the results
+fig, ax = plt.subplots()
+ax.scatter(*Y.T, c=labels)
+ax.set_title(f"$k$NN acc. = {kNN_score}% sil score = {sil_score}")
+fig.savefig("tsimcne.png")
 
 ```
