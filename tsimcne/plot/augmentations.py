@@ -50,7 +50,7 @@ our_augmentations = {
     "Rand Rot.": lambda x: F.rotate(x, 35, fill=[218.8325, 218.8325, 218.8325])
 }
 
-original_image=Image.open('../../images/000200.tiff').resize((32,32))
+original_image=Image.open('../../figures/images/000200.tiff').resize((32,32))
 
 grid_rows, grid_cols = 2, 7
 all_axes = [] 
