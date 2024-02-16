@@ -8,13 +8,13 @@ If you use this code, kindly cite our paper:
 
 ```
 @inproceedings{
-nwabufo2024selfsupervised,
-title={Self-supervised Visualisation of Medical Image Datasets},
-author={Ifeoma Veronica Nwabufo and Jan Niklas B{\"o}hm and Philipp Berens and Dmitry Kobak},
-booktitle={Submitted to Medical Imaging with Deep Learning},
-year={2024},
-url={https://openreview.net/forum?id=HFHRRHsDbT},
-note={under review}
+        nwabufo2024selfsupervised,
+        title={Self-supervised Visualisation of Medical Image Datasets},
+        author={Ifeoma Veronica Nwabufo and Jan Niklas B{\"o}hm and Philipp Berens and Dmitry Kobak},
+        booktitle={Submitted to Medical Imaging with Deep Learning},
+        year={2024},
+        url={https://openreview.net/forum?id=HFHRRHsDbT},
+        note={under review}
 }
 ```
 
