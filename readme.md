@@ -10,6 +10,7 @@ import medmnist.dataset
 from tsimcne.imagedistortions import *
 from tsimcne.tsimcne import TSimCNE
 from evaluation.eval import knn_acc,silhouette_score_
+from torch.utils.data import ConcatDataset
 
 root='datasets'
 dataset_train = medmnist.dataset.DermaMNIST(root=root, split='train', transform=None,k target_transform=None, download=True)
