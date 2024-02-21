@@ -2,44 +2,44 @@ from torch.utils.data import ConcatDataset, Dataset
 from torchvision import transforms
 
 
-def get_transforms(
-    mean, std, size, setting, crop_scale_lo=0.2, crop_scale_hi=1
-):
-    normalize = transforms.Normalize(mean=mean, std=std)
+# def get_transforms(
+#     mean, std, size, setting, crop_scale_lo=0.2, crop_scale_hi=1
+# ):
+#     normalize = transforms.Normalize(mean=mean, std=std)
 
-    crop_scale = crop_scale_lo, crop_scale_hi
-    if setting == "contrastive":
-        return transforms.Compose(
-            [
-                # transforms.RandomRotation(30),
-                transforms.RandomResizedCrop(size=size, scale=crop_scale),
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomApply(
-                    [transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8
-                ),
-                transforms.RandomGrayscale(p=0.2),
-                transforms.ToTensor(),
-                normalize,
-            ]
-        )
-    elif setting == "train_linear_classifier":
-        return transforms.Compose(
-            [
-                transforms.RandomResizedCrop(size=size, scale=(0.2, 1.0)),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                normalize,
-            ]
-        )
-    elif setting == "test_linear_classifier":
-        return transforms.Compose(
-            [
-                transforms.ToTensor(),
-                normalize,
-            ]
-        )
-    else:
-        raise ValueError(f"Unknown transformation setting {setting!r}")
+#     crop_scale = crop_scale_lo, crop_scale_hi
+#     if setting == "contrastive":
+#         return transforms.Compose(
+#             [
+#                 # transforms.RandomRotation(30),
+#                 transforms.RandomResizedCrop(size=size, scale=crop_scale),
+#                 transforms.RandomHorizontalFlip(),
+#                 transforms.RandomApply(
+#                     [transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8
+#                 ),
+#                 transforms.RandomGrayscale(p=0.2),
+#                 transforms.ToTensor(),
+#                 normalize,
+#             ]
+#         )
+#     elif setting == "train_linear_classifier":
+#         return transforms.Compose(
+#             [
+#                 transforms.RandomResizedCrop(size=size, scale=(0.2, 1.0)),
+#                 transforms.RandomHorizontalFlip(),
+#                 transforms.ToTensor(),
+#                 normalize,
+#             ]
+#         )
+#     elif setting == "test_linear_classifier":
+#         return transforms.Compose(
+#             [
+#                 transforms.ToTensor(),
+#                 normalize,
+#             ]
+#         )
+#     else:
+#         raise ValueError(f"Unknown transformation setting {setting!r}")
 
 
 def get_transforms_unnormalized(
@@ -49,12 +49,12 @@ def get_transforms_unnormalized(
     if setting == "contrastive":
         return transforms.Compose(
             [
-                transforms.RandomApply([
-                    lambda img: transforms.functional.rotate(img,90)
-               ]),
+            #     transforms.RandomApply([
+            #         lambda img: transforms.functional.rotate(img,90)
+            #    ]),
                 transforms.RandomResizedCrop(size=size, scale=crop_scale),
                 transforms.RandomHorizontalFlip(),
-                transforms.RandomVerticalFlip(),
+                # transforms.RandomVerticalFlip(),
                 transforms.RandomApply(
                     [transforms.ColorJitter(brightness=0.4,contrast=0.4, 
                         saturation=0.4,hue=0.1 )

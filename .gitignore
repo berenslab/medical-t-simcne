@@ -1,8 +1,7 @@
 datasets/
-mnist_v2.py
-mnist_v3.py
+dataloader/
 log_files/
 numpy_files/
 notebooks/BloodMNIST.ipynb
 notebooks/architecture.ipynb
-pcam_v5.py
+*.py

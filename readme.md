@@ -19,6 +19,11 @@ If you use this code, kindly cite our paper:
 ```
 
 #### Installation
+$t$-SimCNE is available as a package. You could install it by running 
+```python
+pip install tsimcne
+``` 
+or you can clone this repository.
 ```
 git clone https://github.com/berenslab/medical-t-simcne
 cd medical-t-simcne
@@ -72,3 +77,6 @@ ax.set_title(f"$k$NN acc. = {kNN_score}% sil score = {sil_score}")
 fig.savefig("tsimcne.png")
 
 ```
+
+#### Figures
+To reproduce the figures, you can run the scripts in the plot folder at the root of this directory.
