@@ -7,14 +7,13 @@ This repository contains the codes to train a $t$-SimCNE model for medical image
 If you use this code, kindly cite our paper:
 
 ```
-@inproceedings{
-        nwabufo2024selfsupervised,
-        title={Self-supervised Visualisation of Medical Image Datasets},
-        author={Ifeoma Veronica Nwabufo and Jan Niklas B{\"o}hm and Philipp Berens and Dmitry Kobak},
-        booktitle={Submitted to Medical Imaging with Deep Learning},
-        year={2024},
-        url={https://openreview.net/forum?id=HFHRRHsDbT},
-        note={under review}
+@misc{nwabufo2024selfsupervised,
+      title={Self-supervised Visualisation of Medical Image Datasets}, 
+      author={Ifeoma Veronica Nwabufo and Jan Niklas Böhm and Philipp Berens and Dmitry Kobak},
+      year={2024},
+      eprint={2402.14566},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
 }
 ```
 
