@@ -1,7 +1,7 @@
 # Unsupervised Visualisation of Medical Image Datasets
 
 This repository contains the codes to train a $t$-SimCNE model for medical images. You can find our paper here: [Unsupervised Visualisation of Medical Image Datasets
-](https://openreview.net/pdf?id=HFHRRHsDbT)
+](https://arxiv.org/pdf/2402.14566.pdf)
 
 #### Citation
 If you use this code, kindly cite our paper:
@@ -78,4 +78,8 @@ fig.savefig("tsimcne.png")
 ```
 
 #### Figures
-To reproduce the figures, you can run the scripts in the plot folder at the root of this directory.
+To reproduce the figures, you can run the respective python files in the plot folder at the root of this directory.
+
+#### Embeddings
+To get the embeddings run the respective python files in the scripts folder at the root of the directory.
+
