@@ -1,7 +1,10 @@
-datasets/
-dataloader/
+datasets/bloodmnist.npz
+datasets/dermamnist.npz
+datasets/pathmnist.npz
+datasets/pcam16/
+dataloader/leukemia.py
 log_files/
 numpy_files/
-notebooks/BloodMNIST.ipynb
-notebooks/architecture.ipynb
+notebooks/
+scripts/leukemia.py
 *.py
