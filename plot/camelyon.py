@@ -11,7 +11,7 @@ labelcolors = np.array(
 )
 labelnames = ["no metastasis", "metastasis"]
 
-root='numpy_files'
+root='../numpy_files'
 npz = np.load(f"{root}/camelyon.npz")
 labels = npz["lbls"]
 n_labels = len(labelnames)
@@ -111,5 +111,5 @@ with plt.style.context("berenslab.mplstyle"):
     axs[0].axis("equal")
     [ax.set_axis_off() for ax in axs]
 
-    fig.savefig("figures/camelyon_annotation.pdf")
-    fig.savefig("figures/camelyon_annotation.png")
+    fig.savefig("../figures/camelyon_annotation.pdf")
+    fig.savefig("../figures/camelyon_annotation.png")

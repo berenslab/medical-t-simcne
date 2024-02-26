@@ -7,7 +7,7 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox, TextArea, HPacker,
 from PIL import Image, ImageOps
 from matplotlib.colors import ListedColormap
 
-root='numpy_files'
+root='../numpy_files'
 def add_border(input_image, border_size, border_color):
     img_with_border = ImageOps.expand(input_image, border=border_size, fill=border_color)
     return img_with_border
@@ -93,7 +93,7 @@ def plot_embeddings(classes,im_index,npz_path,ax, cm, title,representative_indic
     ax.set_title(title[1])
 
 def annotate_aml(ax):
-    npz_path = f'{root}/aml_new_default.npz'
+    npz_path = f'{root}/aml_med_def.npz'
     label_color_dict = {
         0: ('#2ca02c', 'BAS'),
         1: ("#008080", 'EBO'),
@@ -135,7 +135,7 @@ def annotate_bld(ax):
             3: 'GRA',
             4: 'LYMPH',
             0: 'BAS'}
-    npz_path=f'{root}/bloodmnist_med_def2.npz'
+    npz_path=f'{root}/bloodmnist_med_def.npz'
     cm = plt.get_cmap('tab10', lut=8)
     im_index=[0,4,3,5,1,7,2,6]
   
@@ -178,8 +178,8 @@ def main():
         all_axes.append(ax)
 
     fig.subplots_adjust(left=0.05, right=0.9, top=0.9, bottom=0.1)
-    plt.savefig('figures/toy_datasets.png', dpi=1000)
-    plt.savefig('figures/toy_datasets.pdf', dpi=1000)
+    plt.savefig('../figures/toy_datasets.png', dpi=1000)
+    plt.savefig('../figures/toy_datasets.pdf', dpi=1000)
 
 
 if __name__ == "__main__":

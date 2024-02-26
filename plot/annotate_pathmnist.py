@@ -138,8 +138,8 @@ def main():
         ax.set_axis_off()
 
     
-    fig.savefig('figures/path_annot.png',dpi=300)
-    fig.savefig('figures/path_annot.pdf',dpi=300)
+    fig.savefig('../figures/path_annot.png',dpi=300)
+    fig.savefig('../figures/path_annot.pdf',dpi=300)
 
 if __name__ == "__main__":
     main()

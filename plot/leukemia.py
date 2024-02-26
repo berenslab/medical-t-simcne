@@ -7,21 +7,19 @@ import matplotlib.pyplot as plt
 sys.path.append(os.path.abspath('../../'))
 from tsimcne.evaluation.eval import knn_acc
 
-file_root='numpy_files'
-figure_2=['tsne_pixel_space.npy',
+file_root='../numpy_files'
+file_names=['tsne_pixel_space.npy',
           'Pre-ResNet18.npy',
           'Y_AML_RC_HF_JI_GR.npy',
           'Y_AML_functrot90_RC_HF_VF_JI_GR.npy']
 lbls=np.load(f'{file_root}/labels.npy')
 
-file_names=figure_2
 def load_embed_(file_name,lbls):
     lbls=lbls.squeeze()
     all_embeddings=[]
     knn_acc_=[]
     for file in file_name:
         full_path=os.path.join(file_root,file)
-        print('full path',full_path)
         Y=np.load(full_path)
         knn_acc_.append(knn_acc(Y,lbls))
         all_embeddings.append(Y)
@@ -112,7 +110,7 @@ def plot_diag(Y_i_list, new_labels, label_color_dict, title, col=2):
                             fontsize=7,bbox_to_anchor=(0.73, 0.75),frameon=False,
                             handletextpad=0.1, columnspacing=-0.1, borderaxespad=0)
 
-    plt.savefig('figures/fig2_leukemia.pdf',dpi=2000)
-    plt.savefig('figures/fig2_leukemia.png',dpi=2000)
+    plt.savefig('../figures/fig2_leukemia.pdf',dpi=2000)
+    plt.savefig('../figures/fig2_leukemia.png',dpi=2000)
 
 plot_diag(Y_i_list=embed_list, new_labels=lbls,label_color_dict=label_color_dict,title=knn_acc_,col=4)
