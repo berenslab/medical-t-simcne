@@ -6,7 +6,6 @@ dataloader/leukemia.py
 log_files/
 numpy_files/
 notebooks/
-scripts/leukemia.py
 mnist_v3.py
 mnist_v2.py
 pcam_v5.py
