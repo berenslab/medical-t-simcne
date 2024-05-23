@@ -29,7 +29,7 @@ cd medical-t-simcne
 pip install .
 ```
 
-![Architecture](figures/arch.png "Architecture")
+![Architecture](figures/arch.pdf "Architecture")
 
 
 #### Training a $t$-SimCNE model on MedMNIST dataset
