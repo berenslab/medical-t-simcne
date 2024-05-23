@@ -242,7 +242,13 @@ class ResNet(nn.Module):
         out = self.avgpool(out)
         out = torch.flatten(out, 1)
         return out
-
+from torchvision import models
+from torch import nn
+def pretrained_resnet18(in_channel=3):
+    resnet18_model = models.resnet18(pretrained=True)
+    modules = list(resnet18_model.children())[:-1]  
+    avgpool_model = nn.Sequential(*modules,nn.Flatten())
+    return avgpool_model
 
 def resnet18(**kwargs):
     return ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
@@ -265,4 +271,5 @@ model_dict = {
     "resnet34": [resnet34, 512],
     "resnet50": [resnet50, 2048],
     "resnet101": [resnet101, 2048],
+    "pretrained_resnet18":[pretrained_resnet18,512]
 }
