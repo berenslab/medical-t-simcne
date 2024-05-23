@@ -21,7 +21,7 @@ def add_border(input_image, border_size, border_color):
         img_with_border = ImageOps.expand(input_image, border=border_size, fill=border_color)
         return img_with_border
 
-root_="numpy_files"
+root_="../numpy_files"
 
 train = medmnist.PathMNIST(
     "train", root=root_, download=True
@@ -122,7 +122,8 @@ def main():
 
     with plt.style.context(stylef):
         fig, ax = plt.subplots(
-            figsize=(5.5, 3),
+            figsize=(4.8, 2.9),
+            # figsize=(5.5, 3),
             constrained_layout=True,
         )
         ax.scatter(
