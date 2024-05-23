@@ -60,7 +60,7 @@ batch_size=1024
 total_epochs=[1000,50,450]
 
 # You can also define your custom augmentations by passing a 'data_transform' parameter.
-# For more details check example.py at the root of this directory or 
+# For more details check scripts/mnist.py or 
 # read the documentation here [https://t-simcne.readthedocs.io/]  
 tsimcne = TSimCNE(batch_size=batch_size, total_epochs=total_epochs) 
 Y = tsimcne.fit_transform(dataset_full_)
