@@ -34,14 +34,14 @@ val = medmnist.PathMNIST(
 )
 dataset = torch.utils.data.ConcatDataset([train, test, val])
 
-subclusters={'adipose':(92, 248,-80, 358),
+subclusters={'adipose':(92, 248,40, 358),
              'background':(271,157,421, 227),
              'debris':(-40,-143,139, -140),
              'lymphocytes':(-151,-119,-291, -109),
-             'mucus':(-29,105,-240, 305),
-             'smooth muscle':(96,35,356, 95),
+             'mucus':(-29,105,-220, 305),
+             'smooth muscle':(96,15,226, -49.7),#356, 95
              'colon mucosa': (-117,47,-280, 107),
-             'cancer-ass. stroma':(38,6.6,278, 22),
+             'cancer-ass. stroma':(38,6.6,356, 95),#278, 22
              'col-adenocarcinoma':(-27,-28,-240, 187),
              'artifacts2':(-3,-170,137, -203),
              'colon mucosa2':(-120,-15,-280, 45),
@@ -89,58 +89,28 @@ def annotate_path(ax, Y, dataset, arrowprops=None):
             pil_img_with_border = add_border(pil_img, border_size=2, border_color=border_color)
 
             img_with_border = np.array(pil_img_with_border)
-            imbox = mpl.offsetbox.OffsetImage(img_with_border, zoom=0.45)
+            imbox = mpl.offsetbox.OffsetImage(img_with_border, zoom=0.2)
             imgs.append(imbox)
 
         imrow = mpl.offsetbox.HPacker(children=imgs, pad=0, sep=2)
         
         if not re.search(r'\d', key):
-            txt = mpl.offsetbox.TextArea(key.capitalize())
+            txt = mpl.offsetbox.TextArea(key.capitalize(),
+                                          textprops=dict(size=4))
             annot = mpl.offsetbox.VPacker(
-                children=[txt, imrow], pad=0, sep=2, align="center"
-            )
+                children=[txt, imrow], sep=1, align="center")
+            
         else:
             txt=mpl.offsetbox.TextArea('')
             annot = mpl.offsetbox.VPacker(
-                children=[imrow], pad=0, sep=2, align="center"
+                children=[imrow], sep = 1, align="center"
             )
             
         abox = mpl.offsetbox.AnnotationBbox(
             annot,
             (x, y),
-            (x_axis,y_axis) ,
+            (x_axis+20,y_axis+20) ,
             arrowprops=arrowprops,
             frameon=False)
         ax.add_artist(abox)
 
-
-def main():
-    stylef = "berenslab.mplstyle"
-    npz = np.load(f'{root_}/PathMNIST2.npz', allow_pickle=True)
-    Y = npz['Med_Default_with_Rot_0'].item()['data']
-    labels = np.load(f"{root_}/label_PathMNIST.npy")
-
-    with plt.style.context(stylef):
-        fig, ax = plt.subplots(
-            figsize=(4.8, 2.9),
-            # figsize=(5.5, 3),
-            constrained_layout=True,
-        )
-        ax.scatter(
-            Y[:, 0],
-            Y[:, 1],
-            c=labels,
-            alpha=0.5,
-            rasterized=True,
-        )
-        ax.set_aspect(1)
-
-        annotate_path(ax, Y, dataset)
-        ax.set_axis_off()
-
-    
-    fig.savefig('../figures/path_annot.png',dpi=300)
-    fig.savefig('../figures/path_annot.pdf',dpi=300)
-
-if __name__ == "__main__":
-    main()
