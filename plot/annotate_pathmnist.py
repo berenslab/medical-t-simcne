@@ -24,33 +24,33 @@ def add_border(input_image, border_size, border_color):
 root_="../numpy_files"
 
 train = medmnist.PathMNIST(
-    "train", root=root_, download=True
+    "train", root=root_, download = False
 )
 test = medmnist.PathMNIST(
-    "test", root=root_, download=True
+    "test", root=root_, download = False
 )
 val = medmnist.PathMNIST(
-    "val", root=root_, download=True
+    "val", root=root_, download = False
 )
 dataset = torch.utils.data.ConcatDataset([train, test, val])
 
 subclusters={'adipose':(92, 248,40, 358),
              'background':(271,157,421, 227),
              'debris':(-40,-143,139, -140),
-             'lymphocytes':(-151,-119,-291, -109),
-             'mucus':(-29,105,-220, 305),
-             'smooth muscle':(96,15,226, -49.7),#356, 95
-             'colon mucosa': (-117,47,-280, 107),
-             'cancer-ass. stroma':(38,6.6,356, 95),#278, 22
-             'col-adenocarcinoma':(-27,-28,-240, 187),
+             'lymphocytes':(-151,-119,-280, -109),
+             'mucus':(-29,105,-220+15, 305+20),
+             'smooth muscle':(96,19,330, -5),#356, 95
+             'colon mucosa': (-117,47,-280, 107+25),
+             'cancer-ass. stroma':(38,6.6,400, 100),#278, 22
+             'col-adenocarcinoma':(-27,-28,-240, 187+25),
              'artifacts2':(-3,-170,137, -203),
-             'colon mucosa2':(-120,-15,-280, 45),
+             'colon mucosa2':(-120,-15,-280, 45+25),
              'debris2':(-78,-148,-58, -225),
              'col-adenocarcinoma2':(-70,-73,-270, -23),
              'background2':(223,206,363, 336),
-             'smooth muscle2':(106,-51,226, -49.7),
+             'smooth muscle2':(106,-51,310, -70.7),
              'mucus 2':(11,100,-30, 238 ),
-             'lymphocytes2':(-157,-152,-297, -177),
+             'lymphocytes2':(-157,-152,-280, -177),
              'adipose2':(104,225,204, 345)
              }
 
@@ -94,23 +94,25 @@ def annotate_path(ax, Y, dataset, arrowprops=None):
 
         imrow = mpl.offsetbox.HPacker(children=imgs, pad=0, sep=2)
         
+        
         if not re.search(r'\d', key):
             txt = mpl.offsetbox.TextArea(key.capitalize(),
-                                          textprops=dict(size=4))
+                                          textprops=dict(size=3))
             annot = mpl.offsetbox.VPacker(
                 children=[txt, imrow], sep=1, align="center")
             
         else:
-            txt=mpl.offsetbox.TextArea('')
             annot = mpl.offsetbox.VPacker(
-                children=[imrow], sep = 1, align="center"
+                children=[imrow], sep = 5, align="center"
             )
             
         abox = mpl.offsetbox.AnnotationBbox(
             annot,
             (x, y),
-            (x_axis+20,y_axis+20) ,
+            (x_axis,y_axis),
             arrowprops=arrowprops,
-            frameon=False)
+            frameon=False,
+            pad = -0.2 #determines the distance between the tooltip and the annotation
+            )
         ax.add_artist(abox)
 

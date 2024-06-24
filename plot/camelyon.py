@@ -141,7 +141,7 @@ with plt.style.context("berenslab.mplstyle"):
     
     handles = [
         mpl.lines.Line2D(
-            [], [], lw=0, marker="o", markersize=3, label=name, color=c
+            [], [], lw=0, marker="o", markersize=2, label=name, color=c
         )
         for name, c in zip(labelnames, labelcolors)
     ]
@@ -154,29 +154,29 @@ with plt.style.context("berenslab.mplstyle"):
     #  borderaxespad=0)
     axs[2].legend(
         handles=handles,
-        fontsize=4,
+        fontsize=3,
         loc="upper left",
-        bbox_to_anchor=(-0.25, 0.9),
+        bbox_to_anchor=(-0.15, 0.9),
         handletextpad=0.1,
         frameon=False,
         columnspacing=-0.1
     )
-    # fd = dict(ha="left", va="top", fontsize=1, weight="bold")
+    fd = dict(ha="left", va="top", fontsize=3, weight="bold")
 
-    # axs[0].text(-0.2, 1, 'a', transform=axs[0].transAxes, **fd)
-    # axs[1].text(0, 1, 'b', transform=axs[1].transAxes, **fd)
-    # axs[2].text(0, 1, 'c', transform=axs[2].transAxes, **fd)
+    axs[0].text(-0.2, 1, 'a', transform=axs[0].transAxes, **fd)
+    axs[1].text(0.05, 1, 'b', transform=axs[1].transAxes, **fd)
+    axs[2].text(-0.1, 1, 'c', transform=axs[2].transAxes, **fd)
     # [
     #     ax.text(-0.1, 1, ltr, transform=ax.transAxes, **fd)
     #     for ax, ltr in zip(axs, "abc")
     # ]
-    # axs[0].axis("equal")
+    axs[0].axis("equal")
     # axs[1].axis("equal")
     # axs[2].axis("equal")
     [ax.axis("equal") for ax in axs]
     [ax.set_axis_off() for ax in axs]
 
-    fig.savefig("../figures/ifeoma1.pdf",dpi=300)#../figures/
-    fig.savefig("../figures/ifeoma2.png",dpi=300)#../figures/
+    fig.savefig("../figures/pathology_datasets.pdf",dpi=300)#../figures/
+    fig.savefig("../figures/pathology_datasets.png",dpi=300)#../figures/
 
 print("-------------Done-------------------")
