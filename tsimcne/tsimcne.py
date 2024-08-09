@@ -1,8 +1,9 @@
 import PIL
 import torch
+import torch.utils
 
 from .callback import to_features
-from .imagedistortions import get_transforms_unnormalized
+from .imagedistortions import TransformedPairDataset, get_transforms_unnormalized
 from .losses.infonce import InfoNCECauchy, InfoNCECosine, InfoNCEGaussian
 from .lrschedule import CosineAnnealingSchedule
 from .models.mutate_model import mutate_model
@@ -14,13 +15,16 @@ from .train import train
 class TSimCNE:
     def __init__(
         self,
+        train_dataset,
+        test_dataset = None,
         model=None,
         loss="infonce",
         metric=None,
         backbone="resnet18",
         projection_head="mlp",
         mutate_model_inplace=True,
-        data_transform_train=None,
+        data_transform=None,
+        test_transform = None,
         total_epochs=[1000, 50, 450],
         batch_size=512,
         out_dim=2,
@@ -32,8 +36,6 @@ class TSimCNE:
         device="cuda:0",
         num_workers=8,
         seed=None, 
-        dataset_contrastive = None,
-        normal_dataset = None,
     ):
         self.model = model
         self.loss = loss
@@ -41,7 +43,7 @@ class TSimCNE:
         self.backbone = backbone
         self.projection_head = projection_head
         self.mutate_model_inplace = mutate_model_inplace
-        self.data_transform_train = data_transform_train
+        self.data_transform = data_transform
         self.out_dim = out_dim
         self.batch_size = batch_size
         self.optimizer = optimizer
@@ -53,8 +55,9 @@ class TSimCNE:
         self.device = device
         self.num_workers = num_workers
         self.seed=seed 
-        self.dataset_contrastive = dataset_contrastive
-        self.normal_dataset = normal_dataset 
+        self.train_dataset = train_dataset
+        self.test_dataset = test_dataset 
+        self.test_transform = test_transform
         self._handle_parameters()
 
     def _handle_parameters(self):
@@ -143,25 +146,47 @@ class TSimCNE:
 
     def fit_transform(
         self,
+        X = self.train_dataset,
         return_labels: bool = False,
         return_backbone_feat: bool = False,
     ):
-        self.fit()
+        self.fit(X)
 
-        return self.transform( 
-            return_labels=return_labels,
+        return self.transform( X,
+            return_labels = return_labels,
             return_backbone_feat=return_backbone_feat,
         )
 
-    def fit(self):
+    def fit(self, X = self.train_dataset):
         if not self.mutate_model_inplace:
             from deepcopy import copy
 
             self.model = copy(self.model)
 
+        if self.data_transform is None:
+            sample_img, _lbl = X[0]
+            if isinstance(sample_img, PIL.Image.Image):
+                size = sample_img.size
+            else:
+                raise ValueError(
+                    "The dataset does not return PIL images, "
+                    f"got {type(sample_img)} instead."
+                )
+
+            # data augmentations for contrastive training
+            self.data_transform = get_transforms_unnormalized(
+                size=size,
+                setting="contrastive",
+            )
+
+            self.test_transform = get_transforms_unnormalized(
+                size=size, setting="none")
+        
+            
+        contrastive_dataset = TransformedPairDataset(X, self.data_transform)
         # wrap dataset into dataloader
         train_dl = torch.utils.data.DataLoader(
-            self.dataset_contrastive,
+            contrastive_dataset,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=True,
@@ -216,7 +241,7 @@ class TSimCNE:
     ):
         # wrap dataset into dataloader
         test_loader = torch.utils.data.DataLoader(
-            self.normal_dataset,
+            self.test_dataset,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=False,
