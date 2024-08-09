@@ -1,6 +1,7 @@
 import PIL
 import torch
 import torch.utils
+import torch.utils.data
 
 from .callback import to_features
 from .imagedistortions import TransformedPairDataset, get_transforms_unnormalized
@@ -146,7 +147,7 @@ class TSimCNE:
 
     def fit_transform(
         self,
-        X = self.train_dataset,
+        X:torch.utils.data.Dataset = self.train_dataset,
         return_labels: bool = False,
         return_backbone_feat: bool = False,
     ):
@@ -157,7 +158,7 @@ class TSimCNE:
             return_backbone_feat=return_backbone_feat,
         )
 
-    def fit(self, X = self.train_dataset):
+    def fit(self, X:torch.utils.data.Dataset = self.train_dataset):
         if not self.mutate_model_inplace:
             from deepcopy import copy
 
@@ -179,10 +180,6 @@ class TSimCNE:
                 setting="contrastive",
             )
 
-            self.test_transform = get_transforms_unnormalized(
-                size=size, setting="none")
-        
-            
         contrastive_dataset = TransformedPairDataset(X, self.data_transform)
         # wrap dataset into dataloader
         train_dl = torch.utils.data.DataLoader(
@@ -239,9 +236,27 @@ class TSimCNE:
         return_labels: bool = False,
         return_backbone_feat: bool = False,
     ):
+        
+        if self.test_dataset is None:
+            self.test_dataset = self.train_dataset
+
         # wrap dataset into dataloader
+        if self.test_transform is None:
+            sample_img, _lbl = self.test_dataset[0]
+            if isinstance(sample_img, PIL.Image.Image):
+                size = sample_img.size
+            else:
+                raise ValueError(
+                    "The dataset does not return PIL images, "
+                    f"got {type(sample_img)} instead."
+                )
+            self.test_transform = get_transforms_unnormalized(
+                size=size, setting="none")
+            
+        test_dataset_transformed = TransformedPairDataset(self.test_dataset, self.test_transform)
+
         test_loader = torch.utils.data.DataLoader(
-            self.test_dataset,
+            test_dataset_transformed,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=False,
