@@ -31,12 +31,9 @@ class TSimCNE:
         freeze_schedule="only_linear",
         device="cuda:0",
         num_workers=8,
-        experiment_directory = '.',
-        experiment_name = '', 
         seed=None, 
         dataset_contrastive = None,
         normal_dataset = None,
-        default_ = True
     ):
         self.model = model
         self.loss = loss
@@ -58,9 +55,6 @@ class TSimCNE:
         self.seed=seed 
         self.dataset_contrastive = dataset_contrastive
         self.normal_dataset = normal_dataset 
-        self.experiment_directory = experiment_directory
-        self.experiment_name = experiment_name
-        self.default_ = default_
         self._handle_parameters()
 
     def _handle_parameters(self):
@@ -212,8 +206,6 @@ class TSimCNE:
             self.opt,
             self.lrsched,
             device=self.device,
-            experiment_directory= self.experiment_directory,
-            experiment_name = self.experiment_name,
             # callbacks=self.callbacks 
         )
 
@@ -229,32 +221,19 @@ class TSimCNE:
             num_workers=self.num_workers,
             shuffle=False,
         )
-        if self.default_:
-            Y, backbone_features, labels = to_features(
-                self.model, test_loader, device=self.device,
-            )
-            if return_labels and return_backbone_feat:
-                return Y, backbone_features, labels
-            elif not return_labels and return_backbone_feat:
-                return Y, backbone_features
-            elif return_labels and not return_backbone_feat:
-                return Y, labels
-            else:
-                return Y
-
+        
+        Y, backbone_features, labels = to_features(
+            self.model, test_loader, device=self.device,
+        )
+        if return_labels and return_backbone_feat:
+            return Y, backbone_features, labels
+        elif not return_labels and return_backbone_feat:
+            return Y, backbone_features
+        elif return_labels and not return_backbone_feat:
+            return Y, labels
         else:
-            Y, backbone_features, labels, paths, ids_ = to_features_modified(
-                self.model, test_loader, device=self.device,
-            )
+            return Y
 
-            if return_labels and return_backbone_feat:
-                return Y, backbone_features, labels, paths, ids_
-            elif not return_labels and return_backbone_feat:
-                return Y, backbone_features, paths, ids_
-            elif return_labels and not return_backbone_feat:
-                return Y, labels
-            else:
-                return Y
-
+    
 
 
