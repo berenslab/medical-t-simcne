@@ -2,10 +2,7 @@ import PIL
 import torch
 
 from .callback import to_features
-from .imagedistortions import (
-    TransformedPairDataset,
-    get_transforms_unnormalized,
-)
+from .imagedistortions import get_transforms_unnormalized
 from .losses.infonce import InfoNCECauchy, InfoNCECosine, InfoNCEGaussian
 from .lrschedule import CosineAnnealingSchedule
 from .models.mutate_model import mutate_model
@@ -23,7 +20,7 @@ class TSimCNE:
         backbone="resnet18",
         projection_head="mlp",
         mutate_model_inplace=True,
-        data_transform=None,
+        data_transform_train=None,
         total_epochs=[1000, 50, 450],
         batch_size=512,
         out_dim=2,
@@ -34,7 +31,12 @@ class TSimCNE:
         freeze_schedule="only_linear",
         device="cuda:0",
         num_workers=8,
-        seed=None
+        experiment_directory = '.',
+        experiment_name = '', 
+        seed=None, 
+        dataset_contrastive = None,
+        normal_dataset = None,
+        default_ = True
     ):
         self.model = model
         self.loss = loss
@@ -42,7 +44,7 @@ class TSimCNE:
         self.backbone = backbone
         self.projection_head = projection_head
         self.mutate_model_inplace = mutate_model_inplace
-        self.data_transform = data_transform
+        self.data_transform_train = data_transform_train
         self.out_dim = out_dim
         self.batch_size = batch_size
         self.optimizer = optimizer
@@ -53,19 +55,24 @@ class TSimCNE:
         self.freeze_schedule = freeze_schedule
         self.device = device
         self.num_workers = num_workers
-        self.seed=seed
+        self.seed=seed 
+        self.dataset_contrastive = dataset_contrastive
+        self.normal_dataset = normal_dataset 
+        self.experiment_directory = experiment_directory
+        self.experiment_name = experiment_name
+        self.default_ = default_
         self._handle_parameters()
 
     def _handle_parameters(self):
         if self.model is None:
             self.model = make_model(
-                seed=self.seed,
+                seed=self.seed, 
                 backbone=self.backbone, proj_head=self.projection_head
             )
 
         if self.loss == "infonce":
             if self.metric is None:
-                self.metric = "euclidean"
+                self.metric = "euclidean" #this is the tsimcne loss
 
             if self.metric == "euclidean":
                 self.loss = InfoNCECauchy()
@@ -75,7 +82,7 @@ class TSimCNE:
                 self.loss = InfoNCEGaussian()
             else:
                 raise ValueError(
-                    f"Unknown {self.metric = !r} for InfoNCE loss"
+                    f"Unknown {self.metric!r} for InfoNCE loss"
                 )
         # else: assume that the loss is a proper pytorch loss function
 
@@ -97,14 +104,14 @@ class TSimCNE:
         else:
             raise ValueError(
                 'Expected "auto_batch" or a list of learning rates '
-                f" but got {self.lr = !r}."
+                f" but got {self.lr!r}."
             )
 
         if self.n_stages != len(self.learning_rates):
             raise ValueError(
                 f"Got {self.total_epochs} for total epochs, but "
                 f"{self.learning_rates} for learning rates "
-                f"(due to {self.lr = !r})."
+                f"(due to {self.lr!r})."
             )
 
         if self.warmup == "auto":
@@ -114,7 +121,7 @@ class TSimCNE:
         else:
             raise ValueError(
                 'Expected "auto" or a list of warmup epochs '
-                f"but got {self.warmup = !r}."
+                f"but got {self.warmup!r}."
             )
 
         if len(self.warmup_schedules) != self.n_stages:
@@ -142,51 +149,25 @@ class TSimCNE:
 
     def fit_transform(
         self,
-        X: torch.utils.data.Dataset,
-        data_transform=None,
         return_labels: bool = False,
         return_backbone_feat: bool = False,
     ):
-        self.fit(X)
-        return self.transform(
-            X,
-            data_transform=data_transform,
+        self.fit()
+
+        return self.transform( 
             return_labels=return_labels,
             return_backbone_feat=return_backbone_feat,
         )
 
-    def fit(self, X: torch.utils.data.Dataset):
+    def fit(self):
         if not self.mutate_model_inplace:
             from deepcopy import copy
 
             self.model = copy(self.model)
 
-        if self.data_transform is None:
-            sample_img, _lbl = X[0]
-            if isinstance(sample_img, PIL.Image.Image):
-                size = sample_img.size
-            else:
-                raise ValueError(
-                    "The dataset does not return PIL images, "
-                    f"got {type(sample_img)} instead."
-                )
-
-            # data augmentations for contrastive training
-            self.data_transform = get_transforms_unnormalized(
-                size=size,
-                setting="contrastive",
-            )
-
-            self.data_transform_none = get_transforms_unnormalized(
-                size=size, setting="none"
-            )
-
-        # dataset that returns two augmented views of a given
-        # datapoint (and label)
-        dataset_contrastive = TransformedPairDataset(X, self.data_transform)
         # wrap dataset into dataloader
         train_dl = torch.utils.data.DataLoader(
-            dataset_contrastive,
+            self.dataset_contrastive,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=True,
@@ -196,24 +177,25 @@ class TSimCNE:
             self.epoch_schedule, self.learning_rates, self.warmup_schedules
         )
         for n_stage, (n_epochs, lr, warmup_epochs) in enumerate(it):
+
             self._fit_stage(train_dl, n_epochs, lr, warmup_epochs)
 
-            if n_stage == 0:
+            if n_stage == 0: 
                 mutate_model(
                     self.model,
                     change="lastlin",
-                    freeze=True,
+                    freeze=True,    
                     out_dim=self.out_dim,
                 )
             elif n_stage == 1:
                 mutate_model(self.model, freeze=False)
-
+    
     def _fit_stage(
         self,
         X: torch.utils.data.DataLoader,
         n_epochs: int,
-        lr: float,
-        warmup_epochs: int,
+        lr: float, 
+        warmup_epochs: int, 
     ):
         if self.optimizer == "sgd":
             self.opt = make_sgd(self.model, lr=lr)
@@ -223,56 +205,56 @@ class TSimCNE:
                 self.opt, n_epochs=n_epochs, warmup_epochs=warmup_epochs
             )
 
-        train(
+        return train(
             X,
             self.model,
             self.loss,
             self.opt,
             self.lrsched,
             device=self.device,
+            experiment_directory= self.experiment_directory,
+            experiment_name = self.experiment_name,
+            # callbacks=self.callbacks 
         )
 
-    def transform(
+    def transform( #for evaluation
         self,
-        X: torch.utils.data.Dataset,
-        data_transform=None,
         return_labels: bool = False,
         return_backbone_feat: bool = False,
     ):
-
-        if data_transform is not None:
-            self.data_transform_none = data_transform
-
-        # dataset that returns two augmented views of a given
-        # datapoint (and label)
-        if data_transform is None:
-            sample_img, _lbl = X[0]
-            if isinstance(sample_img, PIL.Image.Image):
-                size = sample_img.size
-            self.data_transform_none = get_transforms_unnormalized(
-            size=size, setting="none"
-        )
-            
-        dataset_contrastive = TransformedPairDataset(
-            X, self.data_transform_none
-        )
         # wrap dataset into dataloader
-        loader = torch.utils.data.DataLoader(
-            dataset_contrastive,
+        test_loader = torch.utils.data.DataLoader(
+            self.normal_dataset,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=False,
         )
+        if self.default_:
+            Y, backbone_features, labels = to_features(
+                self.model, test_loader, device=self.device,
+            )
+            if return_labels and return_backbone_feat:
+                return Y, backbone_features, labels
+            elif not return_labels and return_backbone_feat:
+                return Y, backbone_features
+            elif return_labels and not return_backbone_feat:
+                return Y, labels
+            else:
+                return Y
 
-        Y, backbone_features, labels = to_features(
-            self.model, loader, device=self.device
-        )
-
-        if return_labels and return_backbone_feat:
-            return Y, labels, backbone_features
-        elif not return_labels and return_backbone_feat:
-            return Y, backbone_features
-        elif return_labels and not return_backbone_feat:
-            return Y, labels
         else:
-            return Y
+            Y, backbone_features, labels, paths, ids_ = to_features_modified(
+                self.model, test_loader, device=self.device,
+            )
+
+            if return_labels and return_backbone_feat:
+                return Y, backbone_features, labels, paths, ids_
+            elif not return_labels and return_backbone_feat:
+                return Y, backbone_features, paths, ids_
+            elif return_labels and not return_backbone_feat:
+                return Y, labels
+            else:
+                return Y
+
+
+
