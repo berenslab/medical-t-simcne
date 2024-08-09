@@ -16,7 +16,6 @@ from .train import train
 class TSimCNE:
     def __init__(
         self,
-        train_dataset,
         test_dataset = None,
         model=None,
         loss="infonce",
@@ -56,7 +55,6 @@ class TSimCNE:
         self.device = device
         self.num_workers = num_workers
         self.seed=seed 
-        self.train_dataset = train_dataset
         self.test_dataset = test_dataset 
         self.test_transform = test_transform
         self._handle_parameters()
@@ -147,18 +145,20 @@ class TSimCNE:
 
     def fit_transform(
         self,
-        X:torch.utils.data.Dataset = self.train_dataset,
+        X,
         return_labels: bool = False,
         return_backbone_feat: bool = False,
     ):
+        
         self.fit(X)
 
-        return self.transform( X,
-            return_labels = return_labels,
-            return_backbone_feat=return_backbone_feat,
+        return self.transform(X,
+            return_labels,
+            return_backbone_feat,
         )
 
-    def fit(self, X:torch.utils.data.Dataset = self.train_dataset):
+    def fit(self, X):
+
         if not self.mutate_model_inplace:
             from deepcopy import copy
 
@@ -233,16 +233,17 @@ class TSimCNE:
 
     def transform( #for evaluation
         self,
+        X,
         return_labels: bool = False,
         return_backbone_feat: bool = False,
     ):
         
-        if self.test_dataset is None:
-            self.test_dataset = self.train_dataset
+        if self.test_dataset is not None:
+            X = self.test_dataset
 
         # wrap dataset into dataloader
         if self.test_transform is None:
-            sample_img, _lbl = self.test_dataset[0]
+            sample_img, _lbl = X[0]
             if isinstance(sample_img, PIL.Image.Image):
                 size = sample_img.size
             else:
@@ -253,7 +254,7 @@ class TSimCNE:
             self.test_transform = get_transforms_unnormalized(
                 size=size, setting="none")
             
-        test_dataset_transformed = TransformedPairDataset(self.test_dataset, self.test_transform)
+        test_dataset_transformed = TransformedPairDataset(X, self.test_transform)
 
         test_loader = torch.utils.data.DataLoader(
             test_dataset_transformed,
