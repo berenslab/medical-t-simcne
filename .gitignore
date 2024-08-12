@@ -11,3 +11,5 @@ tmp/
 rebuttal_notebooks/
 rebuttal_fig/
 __pycache__/*
+experiments/
+telegram_c.json
